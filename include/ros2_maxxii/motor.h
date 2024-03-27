@@ -6,39 +6,50 @@
 #include <memory>
 #include <string>
 #include <cmath>
-#include "driver_interface.h"
 
 #define RADPS_TO_RPM (30.0 / M_PI)
 #define DEGPS_TO_RPM (1.0/5.0)
 
-typedef enum Motor_ctrl_mode {VELOCITY, TORQUE} Motor_ctrl_mode;
+typedef enum ctrl_mode_t {VELOCITY, TORQUE} ctrl_mode_t;
+typedef enum vel_unit_t {RADPS, RPM, DEGPS} vel_unit_t;
+
+double convert_vel_into_rpm(double value, vel_unit_t unit);
+double convert_vel_from_rpm(double value, vel_unit_t unit);
+
 
 class Motor
 {
 private:
-    double torque_constant;
-    double speed_ctrl;
-    double sprocket_radius;
-    int id;
-    Motor_ctrl_mode mode;
-    std::shared_ptr<RoboteqDriver> Device;
+    int id_;
+    double torque_constant_;
+    double current_;
+    double current_sp_;
+    double velocity_rpm_;
+    double velocity_sp_rpm_;
+    ctrl_mode_t mode_;
+
 public:
-    Motor(int id, Motor_ctrl_mode mode, double torque_constant, std::shared_ptr<RoboteqDriver> Device);
-    Motor(int id, std::shared_ptr<RoboteqDriver> Device);
+    Motor(int id, ctrl_mode_t mode, double torque_constant);
+    Motor(int id);
     
-    void moveRPM(double rpm);
-    void moveDEGPS(double deg_per_sec);
-    void moveRADPS(double rad_per_sec);
-    void moveMPS(double m_per_sec);
-    void applyTorque(double tau);
-    void applyCurrent(double amp);
+    void setActualVelocity(double velocity, vel_unit_t unit);
+    void setDesiredVelocity(double velocity, vel_unit_t unit);
 
-    double getVoltage() const;
-    double getCurrent() const;
-    double getTemperature() const;
+    void setActualTorque(double tau);
+    void setDesiredTorque(double tau);
+    void setActualCurrent(double amp);
+    void setDesiredCurrent(double amp);
 
-    bool isVelocityMode() {return mode == VELOCITY;}
-    bool isTorqueMode() {return mode == TORQUE;}
+    double getAcutalVelocity(vel_unit_t unit) const;
+    double getDesiredVelocity(vel_unit_t unit) const;
+    double getActualTorque() const;
+    double getDesiredTorque() const;
+    double getActualCurrent() const;
+    double getDesiredCurrent() const;
+
+    bool isVelocityMode() {return mode_ == VELOCITY;}
+    bool isTorqueMode() {return mode_ == TORQUE;}
 };
+
 
 #endif

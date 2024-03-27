@@ -1,79 +1,130 @@
 #include "motor.h"
 
-Motor::Motor(int id, std::shared_ptr<RoboteqDriver> Device)
+
+Motor::Motor(int id, ctrl_mode_t mode, double torque_constant)
 {
-    this->id = id;
-    this->Device = Device;
-    this->torque_constant = 0.0;
-    this->mode = VELOCITY;
+    id_ = id;
+    torque_constant_ = torque_constant;
+    mode_ = mode;
+    current_ = 0.0;
+    current_sp_ = 0.0;
+
+    velocity_rpm_ = 0.0;
+    velocity_sp_rpm_ = 0.0;
 }
 
-Motor::Motor(int id, Motor_ctrl_mode mode, double torque_constant, std::shared_ptr<RoboteqDriver> Device)
+Motor::Motor(int id)
 {
-    this->id = id;
-    this->Device = Device;
-    this->torque_constant = torque_constant;
-    this->mode = mode;
+    Motor(id, VELOCITY, 0.001);
 }
 
+// SETTERS -----------------------------------------------------
 
-
-void Motor::moveMPS(double m_per_sec)
+void Motor::setActualVelocity(double velocity, vel_unit_t unit)
 {
-    double rad_per_sec = m_per_sec / sprocket_radius;
-    moveRADPS(rad_per_sec);
-}
-void Motor::moveRADPS(double rad_per_sec)
-{
-    double rpm = RADPS_TO_RPM * rad_per_sec;
-    moveRPM(rpm);
-}
-void Motor::moveDEGPS(double deg_per_sec)
-{
-    double rpm = DEGPS_TO_RPM * deg_per_sec;
-    moveRPM(rpm);
-}
-void Motor::moveRPM(double rpm)
-{
-    if(isVelocityMode())
-    {
-        Device->setMotorSpeed(id, rpm);
-    }
-    else
-    {
-        throw NEED_VELOCITY_MODE;
-    }
+    velocity_rpm_ = convert_velocity_into_rpm(velocity, unit);
 }
 
-void Motor::applyTorque(double tau)
-{   
-    double amp = tau * torque_constant;
-    applyCurrent(amp);
-}
-void Motor::applyCurrent(double amp)
+void Motor::setDesiredVelocity(double velocity, vel_unit_t unit)
 {
     if(isTorqueMode())
     {
-        Device->setMotorSpeed(id, amp);
+        throw std::logic_error("Error: cannot control velocity when in Troque Control Mode.\n");
     }
-    else
-    {
-        throw NEED_TORQUE_MODE;
-    }
+    velocity_sp_rpm_ = convert_velocity_into_rpm(velocity, unit);
 }
 
-double Motor::getVoltage() const
-{
-    Device->measureMotorsVoltage();
-    return Device->getMotorVoltage(id);
+
+void Motor::setActualTorque(double tau)
+{   
+    double amp = tau * torque_constant;
+    setActualCurrent(amp);
 }
-double Motor::getCurrent() const
-{
-    Device->measureMotorsCurrent();
-    return Device->getMotorCurrent(id);
+
+void Motor::setDesiredTorque(double tau)
+{   
+    double amp = tau * torque_constant;
+    setDesiredCurrent(amp);
 }
-double Motor::getTemperature() const
+
+void Motor::setActualCurrent(double amp)
 {
-    Device->measureTemperature();
-    return Device->getTemperature(id);
+    current_ = amp;
+}
+
+void Motor::setDesiredCurrent(double amp)
+{
+    if(isVelocityMode())
+    {
+        throw std::logic_error("Error: cannot set desired torque/current when in Velocity Control Mode.\n");
+    }
+    current_sp_ = amp;
+}
+
+// GETTERS ---------------------------------------------
+
+double Motor::getAcutalVelocity(vel_unit_t unit) const
+{
+    return convert_vel_from_rpm(velocity_rpm_, unit);
+}
+
+double Motor::getDesiredVelocity(vel_unit_t unit) const
+{
+    return convert_vel_from_rpm(velocity_rpm_, unit);
+}
+
+double Motor::getActualTorque() const
+{
+    return current_ / torque_constant_;
+}
+
+double Motor::getDesiredTorque() const
+{
+    return current_sp_ / torque_constant_;
+}
+
+double Motor::getActualCurrent() const
+{
+    return current_;
+}
+
+double Motor::getDesiredCurrent() const
+{
+    return current_sp_;
+}
+
+double convert_vel_into_rpm(double value, vel_unit_t unit)
+{
+    double res = 0.0
+    switch (unit)
+    {
+    case RADPS:
+        res = RADPS_TO_RPM * value;
+        break;
+    case RPM:
+        res = value;
+    case DEGPS:
+        res = DEGPS_TO_RPM * value;
+    default:
+        throw std::invalid_argument("Error: a non standard measurement unit for velocity was selected for conversion into RPM!\n");
+    }
+    return res;
+}
+
+double convert_vel_from_rpm(double value, vel_unit_t unit)
+{
+    double res = 0.0
+    switch (unit)
+    {
+    case RADPS:
+        res = value / RADPS_TO_RPM;
+        break;
+    case RPM:
+        res = value;
+    case DEGPS:
+        res = value / DEGPS_TO_RPM;
+    default:
+        throw std::invalid_argument("Error: a non standard measurement unit for velocity was selected for conversion into RPM!\n");
+    }
+    return res;
 }
