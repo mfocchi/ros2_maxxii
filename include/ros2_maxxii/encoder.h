@@ -4,28 +4,28 @@
 #include <vector>
 #include <iostream>
 #include <memory>
-#include <string>
 #include <cmath>
-#include "driver_interface.h"
+#include <stdexcept> // exception handling
 
 class Encoder
 {
 private:
-    double pulse_per_revolution;
-    double reference_pulse_count;
-    int id;
-    std::shared_ptr<RoboteqDriver> Device;
+    double ppr_;
+    long reference_pulse_;
+    long pulses_;
+    int id_;
 public:
-    Encoder(int id, double ppr, std::shared_ptr<RoboteqDriver> Device);
+    Encoder(int id, double ppr);
     
-    void setReferencePulseCount(double pulse_count);
-    
-    double getSpeedRPM() const;
-    double getPulseCount() const;
+    void setReferencePulseCount(long pulse_count);
+    void setPulseCount(long pulses);
+
+    long getPulseCount() const;
     double getRevolutions() const;
     double getRadiants() const;
     double getDegrees() const;
-
+    int getId() const;
+    int getPPR() const;
 };
 
 #endif
