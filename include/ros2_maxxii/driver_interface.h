@@ -50,6 +50,7 @@ std::string readTemperature();
 std::string resetEncoder(int id);
 std::string sendMotorCmd(int id, double cmd_value);
 std::string commandInputOutput(bool set, Position p);
+bool isItemInRange(int item);
 
 #endif
 

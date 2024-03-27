@@ -6,7 +6,6 @@ std::string getCmdVersion()
     return issueCommand("?", "FID", 50);
 }
 
-
 std::string mixedModeMotorMove(float throttle, float steering) 
 {
 
@@ -56,7 +55,7 @@ std::string setConfig(int configItem, int index, int value)
     char command[10];
     char args[50];
 
-    if (configItem < 0 || configItem > 255)
+    if (isItemOutRange(configItem))
     {
         std::stringstream ss;
         ss << "Cannot set configuration, item out of reange [0,255] = " << configItem << std::endl;
@@ -81,6 +80,11 @@ std::string setConfig(int configItem, int index, int value)
     return issueCommand("^", command, args, 10, true);
 }
 
+bool isItemOutRange(int item)
+{
+    return item < 0 || item > 255;
+}
+
 std::string setConfig(int configItem, int value) 
 {
     return setConfig(configItem, MISSING_VALUE, value);
@@ -90,7 +94,7 @@ std::string setCommand(int commandItem, int index, int value) {
     char command[10];
     char args[50];
 
-    if (commandItem < 0 || commandItem > 255)
+    if (isItemOutRange(commandItem))
     {
         std::stringstream ss;
         ss << "Cannot set command, item out of reange [0,255] = " << commandItem << std::endl;
@@ -133,7 +137,7 @@ std::string getConfig(int configItem, int index)
     char command[10];
     char args[50];
 
-    if (configItem < 0 || configItem > 255)
+    if (isItemOutRange(configItem))
     {
         std::stringstream ss;
         ss << "Cannot get configuration, item out of reange [0,255] = " << configItem << std::endl;
@@ -162,7 +166,7 @@ std::string getValue(int operatingItem, int index)
     char command[10];
     char args[50];
 
-    if (operatingItem < 0 || operatingItem > 255)
+    if (isItemOutRange(operatingItem))
     {
         std::stringstream ss;
         ss << "Cannot get value, operating item out of reange [0,255] = " << operatingItem << std::endl;
