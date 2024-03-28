@@ -7,17 +7,16 @@
 #include <string>
 #include <cmath>
 #include <sstream>
+#include <unistd.h> 
 #include "roboteq_constants.h"
 
-#define CTRL_MOTOR_MAX_VALUE 1000
 #define BUFFER_SIZE 1024
 #define MISSING_VALUE -1024
 
 typedef enum Position {LEFT, RIGHT} Position;
 
 
-double mapRange(double val1, double max1, double max2);
-double saturate(double val, double max_val);
+
 
 std::string getCmdVersion();
 std::string mixedModeMotorMove(float throttle, float steering);
@@ -36,7 +35,8 @@ std::string getConfig(int configItem);
 
 std::string getValue(int operatingItem, int index);
 
-double extractMeasurement( std::string& reading_str, Position position);
+double extractValueDouble( std::string& reading_str, Position position);
+long extractValueLong( std::string& reading_str, Position position);
 
 std::string extractValueString(std::string msg, std::string command); 
 
@@ -50,7 +50,11 @@ std::string readTemperature();
 std::string resetEncoder(int id);
 std::string sendMotorCmd(int id, double cmd_value);
 std::string commandInputOutput(bool set, Position p);
-bool isItemInRange(int item);
+bool isItemOutRange(int item);
+
+double mapRange(double val1, double max1, double max2);
+double saturate(double val, double max_val);
+void sleep_ms(unsigned long ms);
 
 #endif
 

@@ -27,28 +27,6 @@ std::string issueCommand(std::string commandType, std::string command, int waitm
     return issueCommand(commandType, command, "", waitms, isplusminus);
 }
 
-std::string extractValueString(std::string msg, std::string command) 
-{
-    std::string::size_type pos = msg.rfind(command + "=");
-    if (pos == std::string::npos)
-    {
-        std::stringstream ss;
-        ss << "Could not find character '=' in message '" << msg << std::endl;
-        throw std::runtime_error(ss.str());
-    }
-
-    pos += command.length() + 1; // +1 is because of the '='
-
-    std::string::size_type carriage = msg.find("\r", pos);
-    if (carriage == std::string::npos)
-    {
-        std::stringstream ss;
-        ss << "Could not find character 'Carriage Return' in message '" << msg << std::endl;
-        throw std::runtime_error(ss.str());
-    }
-    return msg.substr(pos, carriage - pos);
-}
-
 std::string setConfig(int configItem, int index, int value) 
 {
     std::string response;
@@ -103,7 +81,6 @@ std::string setCommand(int commandItem, int index, int value) {
     sprintf(command, "$%02X", commandItem);
     sprintf(args, "%i %i", index, value);
 
-    // DEBUG
     std::stringstream sdebug;
     sdebug << args;
 
@@ -185,7 +162,8 @@ std::string getValue(int operatingItem, int index)
     return issueCommand("?", command, args, 10);
 }
 
-double extractMeasurement( std::string& reading_str, Position position) 
+
+double extractValueDouble( std::string& reading_str, Position position) 
 { 
     size_t colonPos = reading_str.find(':');
     std::string reading;
@@ -199,6 +177,44 @@ double extractMeasurement( std::string& reading_str, Position position)
     }
     return std::stoi(reading);
 }
+
+long extractValueLong( std::string& reading_str, Position position) 
+{ 
+    size_t colonPos = reading_str.find(':');
+    std::string reading;
+    if (position == LEFT) 
+    {
+        reading = reading_str.substr(0, colonPos);
+    }
+    else if (position == RIGHT) 
+    {
+        reading = reading_str.substr(colonPos + 1);
+    }
+    return std::stol(reading);
+}
+
+std::string extractValueString(std::string msg, std::string command) 
+{
+    std::string::size_type pos = msg.rfind(command + "=");
+    if (pos == std::string::npos)
+    {
+        std::stringstream ss;
+        ss << "Could not find character '=' in message '" << msg << std::endl;
+        throw std::runtime_error(ss.str());
+    }
+
+    pos += command.length() + 1; // +1 is because of the '='
+
+    std::string::size_type carriage = msg.find("\r", pos);
+    if (carriage == std::string::npos)
+    {
+        std::stringstream ss;
+        ss << "Could not find character 'Carriage Return' in message '" << msg << std::endl;
+        throw std::runtime_error(ss.str());
+    }
+    return msg.substr(pos, carriage - pos);
+}
+
 
 std::string readEncodersCount()
 {
@@ -288,4 +304,9 @@ std::string replaceString(std::string source, std::string find, std::string repl
         pos++;
     }
     return source;
+}
+
+void sleep_ms(unsigned long ms)
+{
+    usleep(ms*1000);
 }
