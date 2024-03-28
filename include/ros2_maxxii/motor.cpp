@@ -36,13 +36,13 @@ void Motor::setDesiredVelocity(double velocity, vel_unit_t unit)
 
 void Motor::setActualTorque(double tau)
 {   
-    double amp = tau * torque_constant;
+    double amp = tau * torque_constant_;
     setActualCurrent(amp);
 }
 
 void Motor::setDesiredTorque(double tau)
 {   
-    double amp = tau * torque_constant;
+    double amp = tau * torque_constant_;
     setDesiredCurrent(amp);
 }
 
@@ -94,7 +94,7 @@ double Motor::getDesiredCurrent() const
 
 double convert_vel_into_rpm(double value, vel_unit_t unit)
 {
-    double res = 0.0
+    double res = 0.0;
     switch (unit)
     {
     case RADPS:
@@ -102,8 +102,10 @@ double convert_vel_into_rpm(double value, vel_unit_t unit)
         break;
     case RPM:
         res = value;
+        break;
     case DEGPS:
         res = DEGPS_TO_RPM * value;
+        break;
     default:
         throw std::invalid_argument("Error: a non standard measurement unit for velocity was selected for conversion into RPM!\n");
     }
@@ -112,7 +114,7 @@ double convert_vel_into_rpm(double value, vel_unit_t unit)
 
 double convert_vel_from_rpm(double value, vel_unit_t unit)
 {
-    double res = 0.0
+    double res = 0.0;
     switch (unit)
     {
     case RADPS:
@@ -120,8 +122,10 @@ double convert_vel_from_rpm(double value, vel_unit_t unit)
         break;
     case RPM:
         res = value;
+        break;
     case DEGPS:
         res = value / DEGPS_TO_RPM;
+        break;
     default:
         throw std::invalid_argument("Error: a non standard measurement unit for velocity was selected for conversion into RPM!\n");
     }
