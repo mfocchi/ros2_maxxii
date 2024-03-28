@@ -43,7 +43,8 @@ add_executable(maxxii_node src/maxxii_node.cpp)
 target_link_libraries(maxxii_node 
   motor
   encoder
-  serial)
+  driver_interface
+  )
 
 target_include_directories(maxxii_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -53,7 +54,8 @@ target_include_directories(maxxii_node PUBLIC
 ament_target_dependencies(maxxii_node 
   rclcpp 
   geometry_msgs
-  sensor_msgs 
+  sensor_msgs
+  serial 
   std_msgs)
 
 install(TARGETS maxxii_node
