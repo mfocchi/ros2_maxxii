@@ -34,7 +34,6 @@ public:
     
     void setActualVelocity(double velocity, vel_unit_t unit);
     void setDesiredVelocity(double velocity, vel_unit_t unit);
-
     void setActualTorque(double tau);
     void setDesiredTorque(double tau);
     void setActualCurrent(double amp);
