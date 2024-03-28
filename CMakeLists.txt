@@ -34,15 +34,12 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
-add_library(error_codes include/${PROJECT_NAME}/error_codes.cpp)
 add_library(driver_interface include/${PROJECT_NAME}/driver_interface.cpp)
 add_library(motor include/${PROJECT_NAME}/motor.cpp)
 add_library(encoder include/${PROJECT_NAME}/encoder.cpp)
 
 add_executable(maxxii_node src/maxxii_node.cpp)
 
-target_link_libraries(motor driver_interface)
-target_link_libraries(encoder driver_interface)
 target_link_libraries(maxxii_node 
   motor
   encoder
