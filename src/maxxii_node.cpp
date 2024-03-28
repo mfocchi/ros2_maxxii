@@ -8,7 +8,7 @@
 #include "ros2_maxxii/driver_interface.h"
 #include "ros2_maxxii/encoder.h"
 #include "ros2_maxxii/motor.h"
-
+#include "serial/serial.h"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "std_msgs/msg/string.hpp"
 
@@ -46,19 +46,19 @@ public:
     {
         double ppr, max_rpm, max_tau, max_amp;
         std::string port;
-        int rate_feedback, rate_system;
+        int rate_enc;
+        unsigned long baud;
+
         this->declare_parameter("port", "/dev/ttyUSB0");
+        this->declare_parameter("baud", 9600);
         this->declare_parameter("motor_max_rpm", 1500.0);
         this->declare_parameter("motor_max_torque_Nm", 1.0);
         this->declare_parameter("motor_max_current_amp", 60.0);
-        this->declare_parameter("enable_system_topic", true);
-        this->declare_parameter("enable_encoder_topic", true);
-        this->declare_parameter("enable_io_topic", false);
-        this->declare_parameter("pub_rate_system_Hz", 1);
-        this->declare_parameter("pub_rate_feedback_Hz", 20);
+        this->declare_parameter("pub_rate_enc_Hz", 20);
         this->declare_parameter("pulse_per_revolution", 1024.0);
 
         this->get_parameter("port", port);
+        this->get_parameter("baud", baud);
         this->get_parameter("motor_max_rpm", max_rpm);
         this->get_parameter("motor_max_current_amp", max_amp);
         this->get_parameter("motor_max_torque_Nm", max_tau);
@@ -79,6 +79,7 @@ public:
         catch(int code){
             printErrorCode(code);
         }
+            com_handle_.reset(new serial::Serial(port, baud));
 
         rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
 		auto qos = rclcpp::QoS(rclcpp::QoSInitialization(qos_profile.history, 10), qos_profile);
