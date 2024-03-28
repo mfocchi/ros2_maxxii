@@ -1,12 +1,11 @@
 #include "encoder.h"
 
 
-Encoder::Encoder(int id, double ppr)
+Encoder::Encoder(double ppr)
 {
     if(ppr <= 0.0)
         throw std::invalid_argument("Error: encoder pulse per revolution cannot be  less than 0!\n");
     ppr_ = ppr;
-    id_ = id;
     
     reference_pulse_ = 0;
     pulses_ = 0;
@@ -41,11 +40,6 @@ double Encoder::getRadiants() const
 double Encoder::getDegrees() const
 {
     return getRevolutions() * 360.0;
-}
-
-int Encoder::getId() const
-{
-    return id_;
 }
 
 int Encoder::getPPR() const

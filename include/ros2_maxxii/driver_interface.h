@@ -47,9 +47,9 @@ std::string readMotorsCurrent();
 std::string readMotorsVoltage();
 std::string readFirmware();
 std::string readTemperature();
-std::string resetEncoder(int id);
-std::string sendMotorCmd(int id, double cmd_value);
-std::string commandInputOutput(bool set, Position p);
+std::string resetEncoder(Position p);
+std::string sendMotorCmd(Position p, double cmd_value);
+std::string commandInputOutput(Position p, bool set);
 bool isItemOutRange(int item);
 
 double mapRange(double val1, double max1, double max2);

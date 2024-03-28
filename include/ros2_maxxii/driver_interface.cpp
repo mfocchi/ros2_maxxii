@@ -251,17 +251,23 @@ std::string readTemperature()
     return getValue(_T, 0);
 }
 
-std::string resetEncoder(int id)
+std::string resetEncoder(Position p)
 {
-    return setCommand(_C, id, 0);
+    if(p == LEFT)
+        return setCommand(_C, 1, 0);
+    else if(p == RIGHT)
+        return setCommand(_C, 2, 0);
 }
 
-std::string sendMotorCmd(int id, double cmd_value)
+std::string sendMotorCmd(Position p, double cmd_value)
 {
-    return setCommand(_GO, id, cmd_value);
+    if(p == LEFT)
+        return setCommand(_GO, 1, cmd_value);
+    else if(p == RIGHT)
+        return setCommand(_GO, 2, cmd_value);
 }
 
-std::string commandInputOutput(bool set, Position p) 
+std::string commandInputOutput(Position p, bool set) 
 {
     // id can be 1 or 2
 

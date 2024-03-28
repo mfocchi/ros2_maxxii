@@ -1,9 +1,8 @@
 #include "motor.h"
 
 
-Motor::Motor(int id, ctrl_mode_t mode, double torque_constant)
+Motor::Motor(ctrl_mode_t mode, double torque_constant)
 {
-    id_ = id;
     torque_constant_ = torque_constant;
     mode_ = mode;
     current_ = 0.0;
@@ -13,9 +12,9 @@ Motor::Motor(int id, ctrl_mode_t mode, double torque_constant)
     velocity_sp_rpm_ = 0.0;
 }
 
-Motor::Motor(int id)
+Motor::Motor()
 {
-    Motor(id, VELOCITY, 0.001);
+    Motor(VELOCITY, 0.001);
 }
 
 // SETTERS -----------------------------------------------------

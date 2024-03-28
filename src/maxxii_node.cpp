@@ -62,10 +62,10 @@ public:
 
         try{
             com_handle_.reset(new serial::Serial(port, baud));
-            encoder_left_.reset(new Encoder(LEFT_ID, ppr, Driver));
-            encoder_right_.reset(new Encoder(RIGHT_ID, ppr, Driver));
-            motor_left_.reset(new Motor(LEFT_ID, Driver));
-            motor_right_.reset(new Motor(RIGHT_ID, Driver));
+            encoder_left_.reset(new Encoder(ppr));
+            encoder_right_.reset(new Encoder(ppr));
+            motor_left_.reset(new Motor());
+            motor_right_.reset(new Motor());
 
             rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
             auto qos = rclcpp::QoS(rclcpp::QoSInitialization(qos_profile.history, 10), qos_profile);

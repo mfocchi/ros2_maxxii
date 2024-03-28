@@ -15,7 +15,7 @@ private:
     long pulses_;
     int id_;
 public:
-    Encoder(int id, double ppr);
+    Encoder(double ppr);
     
     void setReferencePulseCount(long pulse_count);
     void setPulseCount(long pulses);
@@ -24,7 +24,6 @@ public:
     double getRevolutions() const;
     double getRadiants() const;
     double getDegrees() const;
-    int getId() const;
     int getPPR() const;
 };
 

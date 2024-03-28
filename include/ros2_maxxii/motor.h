@@ -20,7 +20,6 @@ double convert_vel_from_rpm(double value, vel_unit_t unit);
 class Motor
 {
 private:
-    int id_;
     double torque_constant_;
     double current_;
     double current_sp_;
@@ -29,8 +28,8 @@ private:
     ctrl_mode_t mode_;
 
 public:
-    Motor(int id, ctrl_mode_t mode, double torque_constant);
-    Motor(int id);
+    Motor(ctrl_mode_t mode, double torque_constant);
+    Motor();
     
     void setActualVelocity(double velocity, vel_unit_t unit);
     void setDesiredVelocity(double velocity, vel_unit_t unit);
