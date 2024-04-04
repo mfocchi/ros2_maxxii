@@ -1,36 +1,19 @@
 #include "motor.h"
 
-
-Motor::Motor(ctrl_mode_t mode, double torque_constant)
-{
-    torque_constant_ = torque_constant;
-    mode_ = mode;
-    current_ = 0.0;
-    current_sp_ = 0.0;
-
-    velocity_rpm_ = 0.0;
-    velocity_sp_rpm_ = 0.0;
-}
-
-Motor::Motor()
-{
-    Motor(VELOCITY, 0.001);
-}
-
 // SETTERS -----------------------------------------------------
 
-void Motor::setActualVelocity(double velocity, vel_unit_t unit)
+void Motor::setActualVelocity(double vel, vel_unit_t unit)
 {
-    velocity_rpm_ = convert_vel_into_rpm(velocity, unit);
+    vel_rpm_ = convert_vel_into_rpm(vel, unit);
 }
 
-void Motor::setDesiredVelocity(double velocity, vel_unit_t unit)
+void Motor::setDesiredVelocity(double vel, vel_unit_t unit)
 {
     if(isTorqueMode())
     {
-        throw std::logic_error("Error: cannot control velocity when in Troque Control Mode.\n");
+        throw std::logic_error("Error: cannot control vel when in Troque Control Mode.\n");
     }
-    velocity_sp_rpm_ = convert_vel_into_rpm(velocity, unit);
+    vel_sp_rpm_ = convert_vel_into_rpm(vel, unit);
 }
 
 
@@ -62,14 +45,15 @@ void Motor::setDesiredCurrent(double amp)
 
 // GETTERS ---------------------------------------------
 
-double Motor::getAcutalVelocity(vel_unit_t unit) const
+double Motor::getActualVelocity(vel_unit_t unit) const
 {
-    return convert_vel_from_rpm(velocity_rpm_, unit);
+    return convert_vel_from_rpm(vel_rpm_, unit);
 }
 
 double Motor::getDesiredVelocity(vel_unit_t unit) const
 {
-    return convert_vel_from_rpm(velocity_rpm_, unit);
+    double vel_rpm_sat = saturate(vel_sp_rpm_, max_rpm_);
+    return convert_vel_from_rpm(vel_rpm_sat, unit);
 }
 
 double Motor::getActualTorque() const
@@ -79,7 +63,8 @@ double Motor::getActualTorque() const
 
 double Motor::getDesiredTorque() const
 {
-    return current_sp_ / torque_constant_;
+    double amp = getDesiredCurrent();
+    return amp / torque_constant_;
 }
 
 double Motor::getActualCurrent() const
@@ -89,8 +74,19 @@ double Motor::getActualCurrent() const
 
 double Motor::getDesiredCurrent() const
 {
-    return current_sp_;
+    return saturate(current_sp_, max_amp_);
 }
+
+double Motor::getMaxRPM() const
+{
+    return max_rpm_;
+}
+
+double Motor::getMaxAmp() const
+{
+    return max_amp_;
+}
+
 
 double convert_vel_into_rpm(double value, vel_unit_t unit)
 {
@@ -107,7 +103,7 @@ double convert_vel_into_rpm(double value, vel_unit_t unit)
         res = DEGPS_TO_RPM * value;
         break;
     default:
-        throw std::invalid_argument("Error: a non standard measurement unit for velocity was selected for conversion into RPM!\n");
+        throw std::invalid_argument("Error: a non standard measurement unit for vel was selected for conversion into RPM!\n");
     }
     return res;
 }
@@ -127,7 +123,17 @@ double convert_vel_from_rpm(double value, vel_unit_t unit)
         res = value / DEGPS_TO_RPM;
         break;
     default:
-        throw std::invalid_argument("Error: a non standard measurement unit for velocity was selected for conversion into RPM!\n");
+        throw std::invalid_argument("Error: a non standard measurement unit for vel was selected for conversion into RPM!\n");
     }
     return res;
+}
+
+double saturate(double val, double max_val)
+{
+    if(val > max_val)
+        return max_val;
+    else if(val < -max_val)
+        return -max_val;
+    else
+        return val;
 }
