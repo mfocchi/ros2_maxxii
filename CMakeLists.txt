@@ -62,4 +62,30 @@ install(TARGETS maxxii_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
+  
+  ament_add_gtest(${PROJECT_NAME}_test 
+    test/main.cpp
+    test/encoder_unittest.cpp
+    test/motor_unittest.cpp
+    test/driver_interface_unittest.cpp
+  )
+  target_include_directories(${PROJECT_NAME}_test PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+  ament_target_dependencies(${PROJECT_NAME}_test 
+    rclcpp
+    geometry_msgs
+    sensor_msgs
+    std_msgs
+  )
+  target_link_libraries(${PROJECT_NAME}_test encoder)
+  target_link_libraries(${PROJECT_NAME}_test motor)
+  target_link_libraries(${PROJECT_NAME}_test driver_interface)
+endif()
+
+
 ament_package()
