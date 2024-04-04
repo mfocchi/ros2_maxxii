@@ -21,6 +21,8 @@ class Motor
 {
 private:
     double torque_constant_;
+    double max_rpm_;
+    double max_amp_;
     double current_;
     double current_sp_;
     double velocity_rpm_;
