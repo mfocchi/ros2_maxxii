@@ -2,13 +2,10 @@
 
 
 Encoder::Encoder(double ppr)
+    : ppr_(ppr), reference_pulse_(0), pulses_(0)
 {
     if(ppr <= 0.0)
-        throw std::invalid_argument("Error: encoder pulse per revolution cannot be  less than 0!\n");
-    ppr_ = ppr;
-    
-    reference_pulse_ = 0;
-    pulses_ = 0;
+        throw std::invalid_argument("Error: encoder pulse per revolution cannot be  less than 0!\n");    
 }
 
 void Encoder::setReferencePulseCount(long pulses)

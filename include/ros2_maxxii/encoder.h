@@ -13,7 +13,6 @@ private:
     double ppr_;
     long reference_pulse_;
     long pulses_;
-    int id_;
 public:
     Encoder(double ppr);
     
