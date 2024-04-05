@@ -39,7 +39,7 @@ public:
         int rate_enc;
         unsigned long baud;
 
-        this->declare_parameter("port", "/dev/ttyUSB0");
+        this->declare_parameter("port", "/dev/ttyACM0");
         this->declare_parameter("baud", 115200);
         this->declare_parameter("motor_max_rpm", 1500.0);
         this->declare_parameter("motor_max_current_amp", 60.0);
@@ -153,7 +153,11 @@ public:
         std::string cmd = mdc2460::reqEncodersCount();        
         com_handle_->write(cmd);
 
-        std::string response = com_handle_->read(BUFFER_SIZE);  
+        std::string response = com_handle_->read(BUFFER_SIZE); 
+        if(response.length() == 0)
+        {
+            return;
+        } 
         double pulses_l = mdc2460::extractValueLong(response, LEFT);
         double pulses_r = mdc2460::extractValueLong(response, RIGHT);
 
