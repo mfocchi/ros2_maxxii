@@ -79,7 +79,7 @@ public:
         }
         catch(std::exception& e)
         {
-            std::cout << e.what() << std::endl;
+            std::cout << "Error: " << e.what() << std::endl;
         }   
     }
 
@@ -88,6 +88,9 @@ public:
     void cmdCallback(const sensor_msgs::msg::JointState::SharedPtr msg)
     {
         try{
+            if (msg->velocity.size() != 2)
+                throw std::invalid_argument("Received a joint state message with size different than 2!\n");
+            
             double value_l_norm = computeControl(msg, motor_l_);
             double value_r_norm = computeControl(msg, motor_r_);
 
@@ -99,7 +102,7 @@ public:
         }
         catch(std::exception& e)
         {
-            std::cout << e.what() << std::endl;
+            std::cout << "Error: " << e.what() << std::endl;
         } 
     }
 
@@ -108,14 +111,16 @@ public:
         double value_norm = 0.0;
         if(motor->isVelocityMode())
         {
-            setMotorSpeeds(msg);
+            motor_l_->setDesiredVelocity(msg->velocity[0], RADPS);
+            motor_r_->setDesiredVelocity(msg->velocity[1], RADPS);
             double vel_rpm = motor->getDesiredVelocity(RPM);
             double max_rpm = motor->getMaxRPM();
             value_norm = mdc2460::mapRange(vel_rpm, max_rpm, SERIAL_MAX_VAL);
         } 
         else if(motor->isTorqueMode())
         {
-            setMotorTorques(msg);
+            motor_l_->setDesiredTorque(msg->effort[0]);
+            motor_r_->setDesiredTorque(msg->effort[1]);
             double current = motor->getDesiredCurrent();
             double max_amp = motor->getMaxAmp();
             value_norm = mdc2460::mapRange(current, max_amp, SERIAL_MAX_VAL);
@@ -127,41 +132,20 @@ public:
         return value_norm;
     }
 
-    // assumption: message has velocities in rad/s
-    void setMotorSpeeds(const sensor_msgs::msg::JointState::SharedPtr joint_state_msg)
-    {
-        if (joint_state_msg->velocity.size() != 2)
-            throw std::invalid_argument("Error: received a joint state message with 'velocity' size different than 2.\n");
-        double vel_l_radps = joint_state_msg->velocity[0];
-        double vel_r_radps = joint_state_msg->velocity[1];
-        motor_l_->setDesiredVelocity(vel_l_radps, RADPS);
-        motor_r_->setDesiredVelocity(vel_r_radps, RADPS);
-    }
-
-    void setMotorTorques(const sensor_msgs::msg::JointState::SharedPtr joint_state_msg)
-    {
-        if (joint_state_msg->effort.size() != 2)
-            throw std::invalid_argument("Error: received a joint state message with 'effort' size different than 2.\n");
-        double motor_l_tau = joint_state_msg->effort[0];
-        double motor_r_tau = joint_state_msg->effort[1];
-        motor_l_->setDesiredTorque(motor_l_tau);
-        motor_r_->setDesiredTorque(motor_r_tau);
-    }
-
     void encCallback() 
     {
         try{
             std::string cmd = mdc2460::reqEncodersCount();        
             com_handle_->write(cmd);
             std::string response = com_handle_->read(BUFFER_SIZE); 
-            std::string data = mdc2460::removeHeaderMessage(response);
             if(response.length() == 0)
             {
                 return;
             } 
+            std::string data = mdc2460::removeHeaderMessage(response);
+
             double pulses_l = mdc2460::extractValueLong(data, LEFT);
             double pulses_r = mdc2460::extractValueLong(data, RIGHT);
-            std::cout << "pulses : " << pulses_l << " | pulses : " << pulses_r << std::endl;
             encoder_l_->setPulseCount(pulses_l);
             encoder_r_->setPulseCount(pulses_r);
 
