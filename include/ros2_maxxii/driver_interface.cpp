@@ -141,7 +141,14 @@ bool mdc2460::isItemOutRange(int item)
     return item < 0 || item > 255;
 }
 
-double mdc2460::extractValueDouble( std::string& reading_str, Position position) 
+std::string mdc2460::extractValueMessage(const std::string& reading_str)
+{
+    std::string::size_type pos = reading_str.rfind("=")+1;
+    std::string::size_type carriage = reading_str.find("\r", pos);
+    return reading_str.substr(pos, carriage - pos);
+}
+
+double mdc2460::extractValueDouble(const std::string& reading_str, Position position) 
 {
     size_t colonPos = reading_str.find(':');
     std::string reading;
@@ -156,17 +163,18 @@ double mdc2460::extractValueDouble( std::string& reading_str, Position position)
     return std::stoi(reading);
 }
 
-long mdc2460::extractValueLong(std::string& reading_str, Position position) 
+long mdc2460::extractValueLong(const std::string& reading_str, Position position) 
 { 
-    size_t colonPos = reading_str.find(':');
+    std::string trim_msg = extractValueMessage(reading_str);
+    size_t colonPos = trim_msg.find(':');
     std::string reading;
     if (position == LEFT) 
     {
-        reading = reading_str.substr(0, colonPos);
+        reading = trim_msg.substr(0, colonPos);
     }
     else if (position == RIGHT) 
     {
-        reading = reading_str.substr(colonPos + 1);
+        reading = trim_msg.substr(colonPos + 1);
     }
     return std::stol(reading);
 }
