@@ -39,11 +39,11 @@ public:
         int rate_enc;
         unsigned long baud;
 
-        this->declare_parameter("port", "/dev/ttyACM0");
+        this->declare_parameter("port", "/dev/ttyUSB0");
         this->declare_parameter("baud", 115200);
         this->declare_parameter("motor_max_rpm", 1500.0);
         this->declare_parameter("motor_max_current_amp", 60.0);
-        this->declare_parameter("pub_rate_enc_Hz", 20);
+        this->declare_parameter("pub_rate_enc_Hz", 100);
         this->declare_parameter("pulse_per_revolution", 1024.0);
         this->declare_parameter("torque_constant", 0.01);
 
@@ -150,28 +150,34 @@ public:
 
     void encCallback() 
     {
-        std::string cmd = mdc2460::reqEncodersCount();        
-        com_handle_->write(cmd);
+        try{
+            std::string cmd = mdc2460::reqEncodersCount();        
+            com_handle_->write(cmd);
+            std::string response = com_handle_->read(BUFFER_SIZE); 
+            std::string data = mdc2460::removeHeaderMessage(response);
+            if(response.length() == 0)
+            {
+                return;
+            } 
+            double pulses_l = mdc2460::extractValueLong(data, LEFT);
+            double pulses_r = mdc2460::extractValueLong(data, RIGHT);
+            std::cout << "pulses : " << pulses_l << " | pulses : " << pulses_r << std::endl;
+            encoder_l_->setPulseCount(pulses_l);
+            encoder_r_->setPulseCount(pulses_r);
 
-        std::string response = com_handle_->read(BUFFER_SIZE); 
-        if(response.length() == 0)
+            sensor_msgs::msg::JointState msg;
+
+            msg.name = {"left", "right"};
+            msg.position = std::vector<double>{
+                encoder_l_->getRadiants(),
+                encoder_r_->getRadiants()};
+
+            enc_pub_->publish(msg);
+        }
+        catch(std::exception& e)
         {
-            return;
+            std::cout << "Error: " << e.what() << std::endl;
         } 
-        double pulses_l = mdc2460::extractValueLong(response, LEFT);
-        double pulses_r = mdc2460::extractValueLong(response, RIGHT);
-
-        encoder_l_->setPulseCount(pulses_l);
-        encoder_r_->setPulseCount(pulses_r);
-
-        sensor_msgs::msg::JointState msg;
-
-        msg.name = {"left", "right"};
-        msg.position = std::vector<double>{
-            encoder_l_->getRadiants(),
-            encoder_r_->getRadiants()};
-
-        enc_pub_->publish(msg);
     }
 };
 
