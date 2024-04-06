@@ -58,7 +58,7 @@ namespace mdc2460
 
     double extractValueDouble(const std::string& reading_str, Position position);
     long extractValueLong(const std::string& reading_str, Position position);     
-    std::string extractValueMessage(const std::string& reading_str);
+    std::string removeHeaderMessage(const std::string& reading_str);
 
     double mapRange(double val1, double max1, double max2);
     void sleep_ms(unsigned long ms);

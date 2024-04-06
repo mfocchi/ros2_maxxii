@@ -141,64 +141,41 @@ bool mdc2460::isItemOutRange(int item)
     return item < 0 || item > 255;
 }
 
-std::string mdc2460::extractValueMessage(const std::string& reading_str)
+std::string mdc2460::removeHeaderMessage(const std::string& msg)
 {
-    std::string::size_type pos = reading_str.rfind("=")+1;
-    std::string::size_type carriage = reading_str.find("\r", pos);
-    return reading_str.substr(pos, carriage - pos);
+    std::string::size_type pos = msg.rfind("=")+1;
+    std::string::size_type carriage = msg.find("\r", pos);
+    return msg.substr(pos, carriage - pos);
 }
 
-double mdc2460::extractValueDouble(const std::string& reading_str, Position position) 
+double mdc2460::extractValueDouble(const std::string& msg, Position position) 
 {
-    size_t colonPos = reading_str.find(':');
+    size_t colonPos = msg.find(':');
     std::string reading;
     if (position == LEFT) 
     {
-        reading = reading_str.substr(0, colonPos);
+        reading = msg.substr(0, colonPos);
     }
     else if (position == RIGHT) 
     {
-        reading = reading_str.substr(colonPos + 1);
+        reading = msg.substr(colonPos + 1);
     }
     return std::stoi(reading);
 }
 
-long mdc2460::extractValueLong(const std::string& reading_str, Position position) 
+long mdc2460::extractValueLong(const std::string& msg, Position position) 
 { 
-    std::string trim_msg = extractValueMessage(reading_str);
-    size_t colonPos = trim_msg.find(':');
+    size_t colonPos = msg.find(':');
     std::string reading;
     if (position == LEFT) 
     {
-        reading = trim_msg.substr(0, colonPos);
+        reading = msg.substr(0, colonPos);
     }
     else if (position == RIGHT) 
     {
-        reading = trim_msg.substr(colonPos + 1);
+        reading = msg.substr(colonPos + 1);
     }
     return std::stol(reading);
-}
-
-std::string mdc2460::extractValueString(std::string msg, std::string cmd) 
-{
-    std::string::size_type pos = msg.rfind(cmd + "=");
-    if (pos == std::string::npos)
-    {
-        std::stringstream ss;
-        ss << "Could not find character '=' in message '" << msg << std::endl;
-        throw std::runtime_error(ss.str());
-    }
-
-    pos += cmd.length() + 1; // +1 is because of the '='
-
-    std::string::size_type carriage = msg.find("\r", pos);
-    if (carriage == std::string::npos)
-    {
-        std::stringstream ss;
-        ss << "Could not find character 'Carriage Return' in message '" << msg << std::endl;
-        throw std::runtime_error(ss.str());
-    }
-    return msg.substr(pos, carriage - pos);
 }
 
 int mdc2460::computeIndexFromPosition(Position p)
