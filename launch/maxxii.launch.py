@@ -19,6 +19,8 @@ def generate_launch_description():
         executable='maxxii_node',
         namespace='',
         name='maxxii_node',
+        output='screen',
+        emulate_tty=True,
         parameters=[config]
       )
    ])
