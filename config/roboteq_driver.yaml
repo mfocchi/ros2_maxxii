@@ -4,6 +4,6 @@
     baud: 115200
     motor_max_rpm: 1500.0
     motor_max_current_amp: 60.0
-    pub_rate_enc_Hz: 150
+    pub_rate_enc_Hz: 200
     pulse_per_revolution: 1024.0 #MEC22-1024-6.000-2L8
     torque_constant: 0.01

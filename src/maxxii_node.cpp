@@ -40,10 +40,10 @@ public:
         unsigned long baud;
 
         this->declare_parameter("port", "/dev/ttyUSB0");
-        this->declare_parameter("baud", 115200);
+        this->declare_parameter("baud", 230400);
         this->declare_parameter("motor_max_rpm", 1500.0);
         this->declare_parameter("motor_max_current_amp", 60.0);
-        this->declare_parameter("pub_rate_enc_Hz", 100);
+        this->declare_parameter("pub_rate_enc_Hz", 200);
         this->declare_parameter("pulse_per_revolution", 1024.0);
         this->declare_parameter("torque_constant", 0.01);
 
@@ -66,9 +66,9 @@ public:
             rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
             auto qos = rclcpp::QoS(rclcpp::QoSInitialization(qos_profile.history, 10), qos_profile);
             
-            enc_pub_ = this->create_publisher<sensor_msgs::msg::JointState>("enc", 1);
+            enc_pub_ = this->create_publisher<sensor_msgs::msg::JointState>("doretta/wheels", 1);
             cmd_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
-                "/cmd", qos, 
+                "/command", qos, 
                 std::bind(&MaxxiiRobotNode::cmdCallback, this, std::placeholders::_1)
                 );
 
@@ -152,6 +152,7 @@ public:
             sensor_msgs::msg::JointState msg;
 
             msg.name = {"left", "right"};
+            msg.header.stamp = this->get_clock()->now();
             msg.position = std::vector<double>{
                 encoder_l_->getRadiants(),
                 encoder_r_->getRadiants()};
