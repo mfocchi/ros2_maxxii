@@ -18,6 +18,15 @@ void Encoder::setPulseCount(long pulses)
     pulses_ = pulses;
 }
 
+void Encoder::setSpeed(long speed)
+{
+    speed_ = speed;
+}
+
+double Encoder::getSpeedRads() const
+{
+    return double(speed_) / ppr_ * 2 * M_PI;
+}
 
 long Encoder::getPulseCount() const
 {

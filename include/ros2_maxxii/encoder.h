@@ -13,6 +13,7 @@ private:
     double ppr_;
     long reference_pulse_;
     long pulses_;
+    long speed_;
 public:
     Encoder(double ppr);
     
@@ -23,6 +24,9 @@ public:
     double getRevolutions() const;
     double getRadiants() const;
     double getDegrees() const;
+
+    void setSpeed(long speed);
+    double getSpeedRads() const;
     int getPPR() const;
 };
 
